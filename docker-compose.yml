@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: my-secret-pw
+      MYSQL_DATABASE: gokay
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+      - ./src/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+      - "8091:8091"
+      - "9091:9091"
+    depends_on:
+      - mysql
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: my-secret-pw
+      DB_NAME: gokay
+    volumes:
+      - ./server-cert.pem:/usr/src/app/server-cert.pem
+      - ./server-key.pem:/usr/src/app/server-key.pem
+
+volumes:
+  mysql-data:
